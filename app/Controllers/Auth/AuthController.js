@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const Validator = require('fastest-validator');
 const v = new Validator();
 const generateAccessToken = require('../../../helpers/generateAccessToken');
-
+const SignUp = require('../../../app/Mail/SignUp');
 
 const AuthController = {
     handleLogin,
@@ -136,7 +136,13 @@ function rememberMe(req, res) {
 async function register(req, res) {
     const {first_name, last_name, username, email, password} = req.body;
     const hash = await bcrypt.hash(password, 10);
-    User.create({first_name, last_name, username, email, password: hash});
+    await User.create({first_name, last_name, username, email, password: hash});
+    await SignUp.sendEmail(
+        email,
+        username,
+        'welcome',
+        'hello and welcome to my repository'
+    );
 
     return res.status(201).json({
         state: true,
